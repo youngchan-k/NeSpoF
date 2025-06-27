@@ -679,7 +679,6 @@ def config_parser():
     
     return parser
 
-
 def train():
 
     parser = config_parser()
@@ -827,37 +826,43 @@ def train():
     if use_batching:
         # For random ray batching
         print('get rays')
-        rays = np.stack([get_rays_np(H, W, K, p) for p in poses[:,:3,:4]], 0) # [N, ro+rd, H, W, 3]
-        # print('done, concats')
         
+        # Extract training data only
+        train_poses = poses[i_train, :3, :4]
+        train_images = images[i_train]
+        train_waves = waves[i_train]
+        N_train = len(i_train)
+        
+        # Pre-allocate rays array for efficiency
+        rays = np.empty((N_train, 2, H, W, 3), dtype=np.float32)
+        
+        # Generate rays for all training poses
+        for i, pose in enumerate(train_poses):
+            rays_o, rays_d = get_rays_np(H, W, K, pose)
+            rays[i, 0] = rays_o
+            rays[i, 1] = rays_d
+        
+        print('reshape and prepare data')
         # 'images' shape = [N, H, W, 4] (4 - Stokes vector s0~s3)
         # 'waves' shape = [N, H, W, 1]
-        print('shuffle rays')
-        rays_ = np.transpose(rays, [0,2,3,1,4])
-        rays_ = np.stack([rays_[i] for i in i_train], 0) # train only
-        rays_ = np.reshape(rays_, [-1,2,3])
-        rays_ = rays_.astype(np.float32)
-        np.random.seed(0)
-        np.random.shuffle(rays_)
+        rays_flat = rays.transpose(0, 2, 3, 1, 4).reshape(-1, 2, 3)  # [N*H*W, 2, 3]
+        images_flat = train_images.reshape(-1, 4)  # [N_train*H*W, 4]
+        waves_flat = train_waves.reshape(-1, 1)  # [N_train*H*W, 1]
         
-        print('shuffle targets')        
-        images_ = np.stack([images[i] for i in i_train], 0) # [N_train, H, W, 4]
-        images_ = np.reshape(images_, [-1,4]) # [N_train*H*W, 4]
+        print('shuffle data')
         np.random.seed(0)
-        np.random.shuffle(images_)
+        total_rays = rays_flat.shape[0]
+        shuffle_idx = np.random.permutation(total_rays)
         
-        print('shuffle waves')
-        waves_ = np.stack([waves[i] for i in i_train], 0) # [N_train, H, W, 1]
-        waves_ = np.reshape(waves_, [-1,1]) # [N_train*H*W, 1]
-        np.random.seed(0)
-        np.random.shuffle(waves_)
+        rays_ = rays_flat[shuffle_idx]
+        images_ = images_flat[shuffle_idx] 
+        waves_ = waves_flat[shuffle_idx]
         
         print('done')
-        
         i_batch = 0
 
     # Move training data to GPU
-    # poses = torch.Tensor(poses).to(device)
+    poses = torch.Tensor(poses).to(device)
     
     # N_iters = 200000 + 1
     N_iters = args.N_iters + 1
@@ -898,7 +903,7 @@ def train():
                 pose = poses[img_i, :3,:4]
 
                 if N_rand is not None:
-                    rays_o, rays_d = get_rays(H, W, K, torch.Tensor(pose))  # (H, W, 3), (H, W, 3)
+                    rays_o, rays_d = get_rays(H, W, K, pose)  # (H, W, 3), (H, W, 3)
 
                     if i < args.precrop_iters:
                         dH = int(H//2 * args.precrop_frac)
@@ -1165,7 +1170,6 @@ def train():
         
     except KeyboardInterrupt:
         print("abort!")
-        
 
 
 if __name__=='__main__':
