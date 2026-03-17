@@ -1,0 +1,26 @@
+# Core (from NeRF-pytorch)
+torch>=1.11.0
+torchvision>=0.9.1
+numpy
+imageio
+imageio-ffmpeg
+matplotlib
+configargparse
+tensorboard>=2.0
+tqdm
+opencv-python
+
+# Scientific / data
+scipy
+pandas
+scikit-image
+
+# Preprocessing (synthetic data division)
+natsort
+
+# 3D camera visualization (utils/camera_frustum_real.py)
+open3d
+
+# OpenEXR & Imath (install separately, see README):
+#   conda install -c conda-forge openexr   (or openexr-python)
+#   pip install imath
