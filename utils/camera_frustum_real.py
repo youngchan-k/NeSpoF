@@ -2,8 +2,8 @@ import numpy as np
 import open3d
 
 from poses.colmap_read_model import read_model, qvec2rotmat
-   
-   
+
+
 def draw_camera(K, R, t, w, h,
                 scale=1, color=[0.8, 0.2, 0.8]):
     """Create axis, plane and pyramed geometries in Open3D format.
@@ -80,7 +80,7 @@ def add_points(vis, path, min_track_len=3, remove_statistical_outlier=True):
             continue
         xyz.append(point3D.xyz)
         rgb.append(point3D.rgb / 255)
-        
+
     pcd.points = open3d.utility.Vector3dVector(xyz)
     pcd.colors = open3d.utility.Vector3dVector(rgb)
 
@@ -88,34 +88,34 @@ def add_points(vis, path, min_track_len=3, remove_statistical_outlier=True):
     if remove_statistical_outlier:
         [pcd, _] = pcd.remove_statistical_outlier(nb_neighbors=20,
                                                     std_ratio=2.0)
-    
+
     # open3d.visualization.draw_geometries([pcd])
     vis.add_geometry(pcd)
     vis.poll_events()
     vis.update_renderer()
-     
-    
+
+
 def add_cameras_poses(vis, path_poses, scale=1, color=[0.8, 0.2, 0.8]):
     frames = []
     poses = np.load(path_poses)
-    
+
     H, W, focal = poses[0,:3,-1]
     extrinsic_mat = poses[:,:3,:4]  # (N, 3, 4)
-    
+
     rot = extrinsic_mat[..., :3]   # (N, 3, 3)
     trans = extrinsic_mat[..., -1]     # (N, 3)
-    
+
     for i in range(trans.shape[0]):
         R = rot[i, ...]
         t = trans[i, ...]
-        
+
         #t = -R.T @ t
         #R = R.T
-        
+
         fx = fy = focal
         cx = W/2
         cy = H/2
-        
+
         K = np.identity(3)
         K[0, 0] = fx
         K[1, 1] = fy
@@ -127,11 +127,11 @@ def add_cameras_poses(vis, path_poses, scale=1, color=[0.8, 0.2, 0.8]):
 
     for i in frames:
         vis.add_geometry(i)
-    
+
 
 def add_cameras(vis, path_bin, scale=1):
     cameras, images, points3D = read_model(path_bin)
-    
+
     frames = []
     for img in images.values():
         # rotation
@@ -173,26 +173,25 @@ def add_cameras(vis, path_bin, scale=1):
     # add geometries to visualizer
     for i in frames:
         vis.add_geometry(i)
-        
-        
+
+
 if __name__ == "__main__":
     OBJECT = "billiard"
-    path = f"C:/Users/owner/Desktop/frustum/images_{}/sparse/0"    
-    
+    path = f"C:/Users/owner/Desktop/frustum/images_{}/sparse/0"
+
     vis = open3d.visualization.Visualizer()
     vis.create_window()
-    
+
     add_points(vis, path)
     add_cameras(vis, path)
-    
+
     # add_cameras_poses(vis, np_path_0, color=[0.5, 0, 0])
     # add_cameras_poses(vis, np_path_1, color=[0.8, 0.2, 0.8])
-    
+
     mesh = open3d.geometry.TriangleMesh.create_coordinate_frame()
     #vis.add_geometry(mesh)
-    
+
     vis.poll_events()
     vis.update_renderer()
     vis.run()
     vis.destroy_window()
-    

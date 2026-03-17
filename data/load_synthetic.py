@@ -11,7 +11,7 @@ import time
 import OpenEXR
 import Imath
 
-from run_nespof_helpers import list2map
+from core.run_nespof_helpers import list2map
 from utils.stokes_basis_rotate import *
 from utils.stokes_params_convert import stokes_to_params
 
@@ -23,7 +23,7 @@ def poses_avg(poses):
     vec2 = normalize(poses[:, :3, 2].sum(0))
     up = poses[:, :3, 1].sum(0)
     c2w = np.concatenate([viewmatrix(vec2, up, center), hwf], 1)
-    
+
     return c2w
 
 def poses_median(poses):
@@ -32,7 +32,7 @@ def poses_median(poses):
     tmp = trans[...,0]
     idx = np.argsort(tmp)[len(tmp)//2]
     c2w = poses[idx]
-    
+
     return c2w
 
 def poses_median2(poses):
@@ -41,7 +41,7 @@ def poses_median2(poses):
     tmp = trans[...,1] # 0: x? / 1: y? / 2: z?
     idx = np.argsort(tmp)[len(tmp)//2]
     c2w = poses[idx]
-    
+
     return c2w
 
 def normalize(x):
@@ -65,23 +65,23 @@ def render_path_spiral(c2w, up, rads, focal, zdelta, zrate, rots, N):
     render_poses = []
     rads = np.array(list(rads) + [1.])
     hwf = c2w[:,4:5]
-    
+
     for theta in np.linspace(0., 2. * np.pi * rots, N+1)[:-1]:
-        c = np.dot(c2w[:3,:4], np.array([np.cos(theta), -np.sin(theta), -np.sin(theta*zrate), 1.]) * rads) 
+        c = np.dot(c2w[:3,:4], np.array([np.cos(theta), -np.sin(theta), -np.sin(theta*zrate), 1.]) * rads)
         z = normalize(c - np.dot(c2w[:3,:4], np.array([0,0,-focal, 1.])))
         render_poses.append(np.concatenate([viewmatrix(z, up, c), hwf], 1))
-        
+
     return render_poses
 
 def render_path_spiral_synthetic(c2w, up, rads, focal, zdelta, zrate, rots, N):
     render_poses = []
     rads = np.array(list(rads) + [1.])
-    
+
     for theta in np.linspace(0., 2. * np.pi * rots, N+1)[:-1]:
-        c = np.dot(c2w[:3,:4], np.array([np.cos(theta), -np.sin(theta), -np.sin(theta*zrate), 1.]) * rads) 
+        c = np.dot(c2w[:3,:4], np.array([np.cos(theta), -np.sin(theta), -np.sin(theta*zrate), 1.]) * rads)
         z = normalize(c - np.dot(c2w[:3,:4], np.array([0,0,-focal, 1.])))
         render_poses.append(viewmatrix(z, up, c))
-        
+
     return render_poses
 
 def pose_spherical(theta, phi, radius):
@@ -107,7 +107,7 @@ def pose_spherical(theta, phi, radius):
     c2w = rot_phi(phi/180.*np.pi) @ c2w
     c2w = rot_theta(theta/180.*np.pi) @ c2w
     c2w = torch.Tensor(np.array([[-1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])) @ c2w
-    
+
     return c2w
 
 
@@ -124,12 +124,12 @@ def read_exr_as_np(fn):
         ch_names.append(ch_name)
         ch_dtype = channels[ch_name].type
         ch_str = f.channel(ch_name, ch_dtype)
-        
+
         if ch_dtype == Imath.PixelType(Imath.PixelType.FLOAT):
             np_dtype = np.float32
         elif ch_dtype == Imath.PixelType(Imath.PixelType.HALF):
             np_dtype = np.half
-            
+
         image_ch = np.fromstring(ch_str, dtype=np_dtype)
         image_ch.shape = (size[1], size[0])
         image[:,:,i] = image_ch
@@ -150,12 +150,12 @@ def mean_var_per_channel_with_alpha(x):
     '''
     mask = (x[...,4:5]>0) # [B,H,W,1]
     stokes = x[...,:4]
-    
+
     mu = stokes.sum((0,1,2))/mask.sum()
     var = (mask*((stokes-mu)**2)).sum((0,1,2))/mask.sum()
     return mu, var
 
-def load_synthetic_data(basedir, half_res=False, testskip=1, rotate_stoke=True, target_wavelength=550, debug=False, render_only=False, scale_rads=0.1):        
+def load_synthetic_data(basedir, half_res=False, testskip=1, rotate_stoke=True, target_wavelength=550, debug=False, render_only=False, scale_rads=0.1):
     splits = ['train', 'val', 'test']
     if debug: # Load small amounts!
         splits = ['train', 'val', 'test']
@@ -163,19 +163,19 @@ def load_synthetic_data(basedir, half_res=False, testskip=1, rotate_stoke=True, 
     for s in splits:
         with open(os.path.join(basedir, 'transforms_{}.json'.format(s)), 'r') as fp:
             metas[s] = json.load(fp)
-    
+
     all_imgs = []
     all_poses = []
     waves = []
     counts = [0]
-    
+
     start, stop, interval = 450, 650, 10
     wavelength = range(start, stop+1, interval)
     if render_only: # Load small amounts!
         print(f"Load exr data for wavelength {target_wavelength} & render_only! (only poses)")
         wavelength = [target_wavelength]
-    
-    
+
+
     for s in splits:
         if s == 'test':
             skip = 1000
@@ -185,66 +185,66 @@ def load_synthetic_data(basedir, half_res=False, testskip=1, rotate_stoke=True, 
             meta = metas[s]
             imgs = []
             poses = []
-            
+
             if debug == True:
                 skip = 100
             elif s=='train' or testskip==0:
                 skip = 1
             else:
                 skip = testskip
-            
+
             for frame in meta['frames'][::skip]:
-                _, set_name, file_name = frame['file_path'].split("/")                
-                fname = os.path.join(basedir, str(w), frame['file_path']+'.exr')                 
+                _, set_name, file_name = frame['file_path'].split("/")
+                fname = os.path.join(basedir, str(w), frame['file_path']+'.exr')
                 image_stokes, _ = read_exr_as_np(fname)    # (H, W, 4) or (H, W, 5) # [s0, s1, s2, s3, Alpha]
-                                    
+
                 imgs.append(image_stokes)     # (H, W, 4) or (H, W, 5)
                 poses.append(np.array(frame['transform_matrix']))
                 waves.append(w)
-                
+
             imgs = np.array(imgs).astype(np.float32)
             poses = np.array(poses).astype(np.float32)
-            
+
             all_imgs.append(imgs)
-            all_poses.append(poses)            
-           
+            all_poses.append(poses)
+
         counts.append(counts[-1] + imgs.shape[0] * len(wavelength))
-        
+
     i_split = [np.arange(counts[i], counts[i+1]) for i in range(3)]
-    
-    imgs = np.concatenate(all_imgs, 0) 
+
+    imgs = np.concatenate(all_imgs, 0)
     poses = np.concatenate(all_poses, 0)
-    
+
     H, W = imgs[0].shape[:2]
     camera_angle_x = float(meta['camera_angle_x'])
     focal = .5 * W / np.tan(.5 * camera_angle_x)
-    
+
     # Rotate Stoke Vector!!!
     # convert stokes following measurement to global basis
     use_alpha = imgs.shape[-1] > 4
     if rotate_stoke:
         stokes, alpha = imgs[...,:4], imgs[...,-1:] # separate stokes & alpha
-        
+
         start = time.time()
-        
+
         cam_kwargs={}
         cam_kwargs['pixel_H'] = H
         cam_kwargs['pixel_W'] = W
         stokes_rotated = np.stack([meas2tgt(stokes[i], poses[i], cam_kwargs) for i in range(imgs.shape[0])], 0) # [H,W,4]
-        
+
         if use_alpha:
             imgs = np.concatenate([stokes_rotated, alpha], -1)
         else:
             imgs = stokes_rotated
-            
+
         print(f"Elapsed time for rotating stoke vector : {time.time()-start}")
-    
+
     render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180,180,40+1)[:-1]], 0)
-    
+
     ###################################################################################
     spiral_render = True
     path_zflat = False
-    
+
     if spiral_render:
         if render_only:
             c2w = poses_median(poses)
@@ -273,7 +273,7 @@ def load_synthetic_data(basedir, half_res=False, testskip=1, rotate_stoke=True, 
         # rads = np.percentile(np.abs(tt), 45, 0)
         rads = c2w[:3,3]
         rads = np.array([scale_rads, scale_rads, scale_rads])
-        
+
         c2w_path = c2w
         N_views = 60
         N_rots = 1
@@ -290,7 +290,7 @@ def load_synthetic_data(basedir, half_res=False, testskip=1, rotate_stoke=True, 
         render_poses = render_path_spiral_synthetic(c2w_path, up, rads, focal, zdelta, zrate=zrate, rots=N_rots, N=N_views)
         render_poses = np.array(render_poses).astype(np.float32)
     ###################################################################################
-    
+
     if half_res:
         H = H//2
         W = W//2
@@ -300,21 +300,21 @@ def load_synthetic_data(basedir, half_res=False, testskip=1, rotate_stoke=True, 
         for i, img in enumerate(imgs):
             imgs_half_res[i] = cv2.resize(img, (W, H), interpolation=cv2.INTER_AREA)
         imgs = imgs_half_res
-    
+
     # Repeat wavelengths
     waves = np.stack(waves, 0) # [B]
     waves = list2map(waves, H, W) # [B,H,W,1]
-    
+
     # Loss weight scales for each channel of stoke vectors
-    if use_alpha: 
+    if use_alpha:
         # Get masked mean and variance using alpha
         gt_mean, gt_var = mean_var_per_channel_with_alpha(imgs)
     else:
         gt_mean, gt_var = mean_var_per_channel(imgs[...,:4])
-    
+
     gt_std = gt_var ** 0.5
     gt_std_inv = np.reciprocal(gt_std)
-    
+
     w_scale = gt_std_inv/(gt_std_inv[...,0]+1e-6) # shape: [4,]
-    
+
     return waves, imgs, poses, render_poses, [H, W, focal], i_split, w_scale
