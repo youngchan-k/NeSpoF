@@ -1,5 +1,10 @@
 # Neural Spectro-polarimetric Fields (NeSpoF)
 
+[![Project Page](https://img.shields.io/badge/-Project%20Page-00bfff?logo=googlechrome&logoColor=white)](https://youngchan-k.github.io/NeSpoF)
+[![arXiv](https://img.shields.io/static/v1?label=&message=arXiv&color=red&logo=arxiv)](https://arxiv.org/abs/2306.12562)
+[![Dataset](https://img.shields.io/static/v1?label=&message=Dataset&color=yellow&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1W7apuXPA3EkyUs8VgZgwdMpnc96aLXXJ)
+[![Mitsuba3 Rendering](https://img.shields.io/static/v1?label=&message=Mitsuba3%20Rendering&color=blueviolet&logo=github&logoColor=white)](https://github.com/youngchan-k/NeSpoF_mitsuba_rendering)
+
 [NeSpoF](https://youngchan-k.github.io/NeSpoF) (Neural Spectro-polarimetric Field) is a physically valid neural representation for spectro-polarimetric fields. It represents Stokes vectors and volumetric density as functions of position, viewing direction, and wavelength.
 
 <img src="NeSpoF.PNG"/>
@@ -37,18 +42,22 @@ Run all commands from the project root (e.g. `python run_nespof.py ...`, `python
 
 ## Datasets
 
-Download the dataset [here](https://drive.google.com/drive/folders/1W7apuXPA3EkyUs8VgZgwdMpnc96aLXXJ). Synthetic data can also be generated using the [Mitsuba 3 rendering pipeline](https://github.com/youngchan-k/NeSpoF_mitsuba_rendering). Place the downloaded dataset according to the following directory structure:
+Download the datasets [here](https://drive.google.com/drive/folders/1W7apuXPA3EkyUs8VgZgwdMpnc96aLXXJ). Place the downloaded dataset according to the following directory structure:
 
-```
+📌 **Synthetic data can also be generated using the [Mitsuba 3 rendering pipeline](https://github.com/youngchan-k/NeSpoF_mitsuba_rendering).**
+
+```text
 data
 |-- synthetic
-|   |-- ajar
-|   |-- cbox_dragon
-|   |-- ...
+    |-- ajar
+    |-- cbox_dragon
+    |-- cbox_sphere
+    |-- hotdog
 |-- real
     |-- scene_1
     |-- scene_2
-    |-- ...
+    |-- scene_3
+    |-- scene_4
 ```
 
 ## Preprocessing
