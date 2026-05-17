@@ -2,8 +2,6 @@
 
 [NeSpoF](https://youngchan-k.github.io/NeSpoF) (Neural Spectro-polarimetric Field) is a physically valid neural representation for spectro-polarimetric fields. It represents Stokes vectors and volumetric density as functions of position, viewing direction, and wavelength.
 
-The code is based on [NeRF-pytorch](https://github.com/yenchenlin/nerf-pytorch).
-
 <img src="NeSpoF.PNG"/>
 
 ## Installation
@@ -54,7 +52,7 @@ data
 ```
 
 ## Preprocessing
-⚠️ Not necessary if you use the downloaded dataset
+⚠️ **Not necessary if you use the downloaded dataset!**
 
 Preprocessing utilities are located in `utils/`:
 
