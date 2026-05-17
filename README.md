@@ -21,15 +21,18 @@ conda install -c conda-forge openexr
 conda install -c conda-forge openexr-python
 ```
 
-## Project structure
-- `run_nespof.py` — main entry for training and rendering
-- `core/` — training helpers (network, losses, ray utilities)
-- `data/` — data loaders (`load_synthetic.py`, `load_real.py`)
-- `visualization/` — Stokes and polarimetric visualization
-- `utils/` — preprocessing scripts, pose estimation (COLMAP), Stokes utilities, camera frustum tools
-- `notebooks/` — Jupyter notebooks (color mapping, func fitting, etc.)
-- `configs/` — config files for synthetic, real, and video runs
-- `scripts/` — shell scripts for batch preprocessing
+## Project Structure
+
+| Path | Description |
+|---|---|
+| `run_nespof.py` | Main entry point for training and rendering |
+| `core/` | Training utilities, network definitions, losses, and ray helpers |
+| `data/` | Dataset loaders for synthetic and real-world data |
+| `visualization/` | Stokes and polarimetric visualization tools |
+| `utils/` | Preprocessing scripts, COLMAP pose estimation, and utility functions |
+| `notebooks/` | Jupyter notebooks for analysis and visualization |
+| `configs/` | Configuration files for training and rendering |
+| `scripts/` | Shell scripts for preprocessing and batch execution |
 
 Run all commands from the project root (e.g. `python run_nespof.py ...`, `python utils/data_preprocess_real.py ...`).
 
