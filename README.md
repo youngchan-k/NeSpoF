@@ -49,27 +49,32 @@ data
 ```
 
 ## Usage
-To train NeSpoF on synthetic datasets:
+Run NeSpoF with:
+
 ```bash
-python run_nespof.py --config configs/synthetic/{DATASET}.txt
+python run_nespof.py --config configs/{TYPE}/{DATASET}.txt
 ```
-Replace `{DATASET}` with `ajar`, `cbox_dragon`, `cbox_sphere`, or `hotdog`.
 
----
+### Available config types
 
-To train NeSpoF on real-world datasets:
+| Type | Description | Datasets |
+|---|---|---|
+| `synthetic` | Train on synthetic datasets | `ajar`, `cbox_dragon`, `cbox_sphere`, `hotdog` |
+| `real` | Train on real-world datasets | `scene_1`, `scene_2`, `scene_3`, `scene_4` |
+| `video` | Render Stokes/polarimetric visualization videos | All datasets above |
+
+Example:
+
 ```bash
-python run_nespof.py --config configs/real/{DATASET}.txt
-```
-Replace `{DATASET}` with `scene_1`, `scene_2`, `scene_3`, or `scene_4`.
+# Train on a synthetic dataset
+python run_nespof.py --config configs/synthetic/ajar.txt
 
----
+# Train on a real-world dataset
+python run_nespof.py --config configs/real/scene_1.txt
 
-After training, you can also render the video for Stokes vector and polarimetric visualization:
-```bash
-python run_nespof.py --config configs/video/{DATASET}.txt
+# Render visualization videos
+python run_nespof.py --config configs/video/ajar.txt
 ```
-Replace `{DATASET}` with `ajar`, `cbox_dragon`, `cbox_sphere`, `hotdog`, `scene_1`, `scene_2`, `scene_3`, or `scene_4`.
 
 
 ## Citation
