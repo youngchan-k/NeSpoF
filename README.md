@@ -53,7 +53,8 @@ data
     |-- ...
 ```
 
-## Preprocessing (Not necessary if you use the downloaded dataset)
+## Preprocessing
+⚠️ Not necessary if you use the downloaded dataset
 
 Preprocessing utilities are located in `utils/`:
 
