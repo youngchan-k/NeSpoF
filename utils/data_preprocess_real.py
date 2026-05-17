@@ -68,7 +68,7 @@ def image_undistortion(imgpath, savepath, mtx, dist, newcameramtx, roi):
 
 
 def spec_calib(wavelength):
-    calib = pd.read_csv("./datasheet/trasmission_data.csv")
+    calib = pd.read_csv("./datasheet/transmission_data.csv")
 
     # Filter transmission at wavelength
     calib_1 = np.array(calib[["wave1", "FT"]])
